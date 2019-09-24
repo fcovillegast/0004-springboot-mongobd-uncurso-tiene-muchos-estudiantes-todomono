@@ -2,6 +2,7 @@ package workshop.spring.boot.workshopspringboot.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -32,7 +33,12 @@ public class StudentServiceImpl implements StudentService {
 		return studentSaved;
 	}
 
+	
+	
 	public Mono<Student> create(Student student) {
+		Assert.notNull(student,"Student cannot be null");
+		Assert.isTrue(!exist(student),"StudentId already exist");
+		
 		Mono<Student> mono = studentRepository.save(student);
 		return mono;
 	}
@@ -40,12 +46,13 @@ public class StudentServiceImpl implements StudentService {
 	public Mono<Student> update(Integer id, Student student) {
 
 		Mono<Student> studentMono = this.findBy(id);
-
-		studentMono.doOnSuccess(studentFinded->{
+		 
+		studentMono = studentMono.doOnSuccess(studentFinded->{
 			studentFinded.setRut(student.getRut());
 			studentFinded.setName(student.getName());
 			
 	 		Mono<Student> studentSaved = studentRepository.save(studentFinded);
+	 		studentSaved.subscribe();
 		});
 		
 		return studentMono;
@@ -53,22 +60,15 @@ public class StudentServiceImpl implements StudentService {
 	}
 
 	public Mono<Void> delete(Integer id) {
-		Mono<Student> studentSaved = this.findBy(id);
+		findBy(id);
 		
 		Mono<Void> monoVoid = studentRepository.deleteById(id);
-		monoVoid.subscribe(); 
+		//monoVoid.subscribe(); 
 		
 		return monoVoid;
 	}
 	
-	public Mono<Void> deleteM2(Integer id) {
-		Mono<Student> studentSaved = this.findBy(id);
-		
-		Mono<Void> monoVoid = studentRepository.delete(studentSaved.block());
-		monoVoid.subscribe(); 
-		
-		return monoVoid;
-	}
+	 
 
 	private void checkExistStudent(Integer id, Mono<Student> studentSaved) {
 		if (studentSaved == null || studentSaved.block() == null) {
@@ -76,19 +76,15 @@ public class StudentServiceImpl implements StudentService {
 		}
 	}
 
-//	@Override
-//	public Flux<Student> findByCourse(Integer idCourse) {
-//		
-//		Mono<Course> course = courseService.monoFindBy(idCourse);
-//		
-//		Flux<Student> students = studentRepository.findAllByCourse(course.block());
-//		
-//		return students;
-//	}
+	@Override
+	public boolean exist(Student student) {
+		boolean existe = false;
+		if(student != null) {
+			Mono<Student> studentSaved = studentRepository.findById(student.getId());
+			existe = studentSaved != null && studentSaved.block() != null;
+		}
+		
+		return existe;
+	}
 
-//	@Override
-//	public Mono<Student> addCourse(Integer idCourse, Integer idStudent) {
-//		
-//		throw new RuntimeException("No implementado");
-//	}
 }

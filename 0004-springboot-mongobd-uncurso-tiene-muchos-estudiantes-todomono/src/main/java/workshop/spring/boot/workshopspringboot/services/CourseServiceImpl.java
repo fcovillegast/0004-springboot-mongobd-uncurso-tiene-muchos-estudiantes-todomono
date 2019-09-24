@@ -40,14 +40,6 @@ public class CourseServiceImpl implements CourseService {
 		return courseSaved;
 	}
 	
-	@Override
-	public Mono<Course> monoFindBy(Integer idCourse) {
-		Mono<Course> courseSaved = courseRepository.findById(idCourse);
-
-		checkExistCourse(idCourse, courseSaved);
-
-		return courseSaved;
-	}
 
 	@Override
 	public Mono<Course> create(Course course) {
@@ -58,16 +50,9 @@ public class CourseServiceImpl implements CourseService {
 
 	@Override
 	public Mono<Course> update(Integer id, Course course) {
-
-		Mono<Course> courseSaved = this.findBy(id);
-		courseSaved.doOnSuccess(courseFinded->{
-			courseFinded.setName(course.getName());
-			courseFinded.setStudent(course.getStudent());
-
-			Mono<Course> mono = courseRepository.save(courseFinded);
-			mono.subscribe();
-		});
+		findBy(course.getId());
 		
+		Mono<Course> courseSaved = courseRepository.save(course);
 		
 		return courseSaved;
 	}
@@ -80,6 +65,8 @@ public class CourseServiceImpl implements CourseService {
 
 	@Override
 	public Mono<Void> delete(Integer id) {
+		Mono<Course> savedCourse = findBy(id);	
+		
 		return courseRepository.deleteById(id);
 	}
 
@@ -88,7 +75,7 @@ public class CourseServiceImpl implements CourseService {
 		Mono<Course> courseFinded = findBy(idCourse);
 		Student studentToAdd = studentService.findBy(idStudent).block();
 		
-		courseFinded.doOnSuccess(course->{
+		courseFinded= courseFinded.doOnSuccess(course->{
 			System.out.println("course");
 			
 			List<Student> students = course.getStudent();
@@ -111,7 +98,8 @@ public class CourseServiceImpl implements CourseService {
 				course.getStudent().add(studentToAdd);	
 			}
 			
-			update(idCourse, course);
+			Mono<Course> courseUpdated = update(idCourse, course);
+			courseUpdated.subscribe();
 		});
 		
 		

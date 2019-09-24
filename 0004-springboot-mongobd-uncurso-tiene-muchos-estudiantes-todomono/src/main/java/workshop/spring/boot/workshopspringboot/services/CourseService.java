@@ -15,8 +15,6 @@ public interface CourseService {
 	Mono<Course> update(Integer id, Course course); 
 	
 	Mono<Void> delete(Integer id);
-
-	Mono<Course> monoFindBy(Integer idCourse);
 	
 	Mono<Course> addStudent(Integer idCourse, Integer idStudent);
 	

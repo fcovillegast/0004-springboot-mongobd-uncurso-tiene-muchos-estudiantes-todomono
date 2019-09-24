@@ -45,6 +45,7 @@ public class StudentController {
 	@PostMapping
 	@ResponseBody
 	public ResponseEntity<Mono<Student>> create(@Valid  @RequestBody Student student) {
+		
 		Mono<Student> savesStudent = studentService.create(student);
 		
 		return new ResponseEntity<Mono<Student>>(savesStudent, HttpStatus.CREATED);
@@ -52,10 +53,9 @@ public class StudentController {
 	
 	@DeleteMapping("/{id}")
 	@ResponseBody
-	public ResponseEntity<Student> delete(@PathVariable(value="id") Integer id) {
-		studentService.deleteM2(id);
-		
-		return new ResponseEntity<>(null, HttpStatus.CREATED);
+	public ResponseEntity<Mono<Void>> delete(@PathVariable(value="id") Integer id) {
+		Mono<Void> monoVoid = studentService.delete(id);
+		return new ResponseEntity<Mono<Void>>(monoVoid, HttpStatus.OK);
 		
 	}
 	
@@ -64,22 +64,7 @@ public class StudentController {
 	public ResponseEntity<Mono<Student>> update(@PathVariable(value="id") Integer id, @Valid @RequestBody Student student) {
 		Mono<Student> studentSaved = studentService.update(id, student);
 		
-		return new ResponseEntity<Mono<Student>>(studentSaved, HttpStatus.CREATED);
+		return new ResponseEntity<Mono<Student>>(studentSaved, HttpStatus.OK);
 	}
-//	
-//	@RequestMapping("/inCourse/{id_course}")
-//	@ResponseBody
-//	public Flux<Student> getStudents(@PathVariable(value="id_course") Integer idCourse) {
-//		return studentService.findByCourse(idCourse);
-//	}
-//
-//	@PutMapping("/{studentId}/{courseId}")
-//	@ResponseBody
-//	public ResponseEntity<Mono<Student>> addStudent(@PathVariable(value = "studentId") Integer studentId,
-//			@PathVariable(value = "courseId") Integer courseId) {
-//		
-//		Mono<Student> studentSaved = studentService.addCourse(courseId, studentId);
-//
-//		return new ResponseEntity<Mono<Student>>(studentSaved, HttpStatus.OK);
-//	}
+
 }

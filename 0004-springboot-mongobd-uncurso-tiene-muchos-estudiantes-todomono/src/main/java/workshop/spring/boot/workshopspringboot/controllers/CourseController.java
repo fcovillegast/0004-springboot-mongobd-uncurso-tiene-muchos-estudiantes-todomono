@@ -50,7 +50,7 @@ public class CourseController {
 	public ResponseEntity<Mono<Course>> update(@PathVariable(value="id") Integer id , @RequestBody Course course) {
 		Mono<Course> courseSaved = courseService.update(id, course);
 		
-		return new ResponseEntity<Mono<Course>>(courseSaved, HttpStatus.OK);
+		return new ResponseEntity<Mono<Course>>(courseSaved, HttpStatus.ACCEPTED);
 		
 	}
 	
